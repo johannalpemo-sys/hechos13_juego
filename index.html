@@ -31,8 +31,8 @@
         border: 3px dashed #555;
     }
 
-    #judios { background-color: #fde0dc; }  /* color para dificultad */
-    #gentiles { background-color: #e0f7fa; } /* color para dificultad */
+    #judios { background-color: #fde0dc; }
+    #gentiles { background-color: #e0f7fa; }
 
     .images {
         margin-top: 30px;
@@ -57,7 +57,6 @@
         font-size: 14px;
         text-align: center;
         padding: 5px;
-        touch-action: none;
     }
 
     #versiculos {
@@ -81,7 +80,7 @@
         border-radius: 50%;
     }
 
-    /* Modal de mensaje de fin */
+    /* Modal */
     #gameOverModal {
         display: none;
         position: fixed;
@@ -128,7 +127,6 @@
     }
 </style>
 </head>
-
 <body>
 
 <h1>La exhortación de Pablo en Antioquía (3ª. Parte)<br>
@@ -136,14 +134,12 @@ Regocijo y persecución por la Palabra<br>
 Hechos 13:42-52</h1>
 
 <div id="timer">Tiempo: 60</div>
-
 <h3>Arrastra cada reacción al grupo correcto</h3>
 
 <div class="container">
     <div id="judios" class="dropzone" data-type="negativo">
         <h2>Judíos</h2>
     </div>
-
     <div id="gentiles" class="dropzone" data-type="positivo">
         <h2>Gentiles</h2>
     </div>
@@ -154,14 +150,12 @@ Hechos 13:42-52</h1>
     <div class="item" draggable="true" data-type="positivo" style="background:#1E88E5;">Glorificar la Palabra</div>
     <div class="item" draggable="true" data-type="positivo" style="background:#FDD835;">Fe</div>
     <div class="item" draggable="true" data-type="positivo" style="background:#FB8C00;">Gozo</div>
-
     <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Celos</div>
     <div class="item" draggable="true" data-type="negativo" style="background:#8E24AA;">Contradicción</div>
     <div class="item" draggable="true" data-type="negativo" style="background:#00ACC1;">Blasfemia</div>
     <div class="item" draggable="true" data-type="negativo" style="background:#D81B60;">Persecución</div>
 </div>
 
-<!-- SONIDOS -->
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
 
@@ -170,7 +164,6 @@ Hechos 13:42-52</h1>
     <div id="versiculos-items"></div>
 </div>
 
-<!-- Modal de final de juego -->
 <div id="gameOverModal">
     <div id="gameOverContent">
         <div id="gameOverText"></div>
@@ -192,134 +185,127 @@ let countdown = setInterval(() => {
     if(gameOver) return;
     timer--;
     timerElement.textContent = "Tiempo: " + timer;
+    if(timer<=0){ clearInterval(countdown); gameOver=true; finishGame(); }
+},1000);
 
-    if (timer <= 0) {
-        clearInterval(countdown);
-        gameOver = true;
-        finishGame();
-    }
-}, 1000);
-
-// Versículos asociados
 const versiculos = {
-    "Regocijo": "Hechos 13:48 — “Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor.”",
-    "Glorificar la Palabra": "Hechos 13:48 — “Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor.”",
-    "Fe": "Hechos 13:48 — “Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor.”",
-    "Gozo": "Hechos 13:52 — “Los discípulos estaban llenos de gozo y del Espíritu Santo.”",
-    "Celos": "Hechos 13:45 — “Pero los judíos se llenaron de celos y contradijeron lo que Pablo decía.”",
-    "Contradicción": "Hechos 13:45 — “Pero los judíos se llenaron de celos y contradijeron lo que Pablo decía.”",
-    "Blasfemia": "Hechos 13:45 — “Pero los judíos se llenaron de celos y contradijeron lo que Pablo decía.”",
-    "Persecución": "Hechos 13:52 — “Los discípulos estaban llenos de gozo y del Espíritu Santo.”"
+    "Regocijo":"Hechos 13:48",
+    "Glorificar la Palabra":"Hechos 13:48",
+    "Fe":"Hechos 13:48",
+    "Gozo":"Hechos 13:52",
+    "Celos":"Hechos 13:45",
+    "Contradicción":"Hechos 13:45",
+    "Blasfemia":"Hechos 13:45",
+    "Persecución":"Hechos 13:52"
 };
 
-// Drag and Drop compatible con touch y mouse
-function makeDraggable(item) {
-    // Mouse drag
-    item.addEventListener("dragstart", e => {
-        if(gameOver || item.dataset.locked === "true") e.preventDefault();
-        e.dataTransfer.setData("type", item.dataset.type);
-        e.dataTransfer.setData("text", item.innerText);
+// Draggable + touch
+function makeDraggable(item){
+    // mouse
+    item.addEventListener("dragstart", e=>{
+        if(gameOver || item.dataset.locked==="true") e.preventDefault();
+        e.dataTransfer.setData("type",item.dataset.type);
+        e.dataTransfer.setData("text",item.innerText);
     });
-
-    // Touch events
-    item.addEventListener("touchstart", e => {
-        if(gameOver || item.dataset.locked === "true") return;
+    // touch
+    item.addEventListener("touchstart", e=>{
+        if(gameOver || item.dataset.locked==="true") return;
         let touch = e.touches[0];
-        item.style.position = "absolute";
-        item.style.zIndex = 1000;
+        item.style.position="absolute";
+        item.style.zIndex=1000;
         moveAt(touch.pageX, touch.pageY);
 
-        function moveAt(x, y) {
-            item.style.left = x - item.offsetWidth/2 + 'px';
-            item.style.top = y - item.offsetHeight/2 + 'px';
+        function moveAt(x,y){
+            item.style.left = x-item.offsetWidth/2 + "px";
+            item.style.top = y-item.offsetHeight/2 + "px";
         }
 
-        function onTouchMove(e) {
+        function onTouchMove(e){
             let touch = e.touches[0];
             moveAt(touch.pageX, touch.pageY);
         }
+        document.addEventListener("touchmove",onTouchMove);
 
-        document.addEventListener("touchmove", onTouchMove);
-
-        item.addEventListener("touchend", e => {
-            document.removeEventListener("touchmove", onTouchMove);
-            checkDrop(item);
-        }, { once: true });
+        item.addEventListener("touchend", e=>{
+            document.removeEventListener("touchmove",onTouchMove);
+            // Detectar dropzone
+            let dropped = false;
+            dropzones.forEach(zone=>{
+                let rect = zone.getBoundingClientRect();
+                let centerX = item.getBoundingClientRect().left + item.offsetWidth/2;
+                let centerY = item.getBoundingClientRect().top + item.offsetHeight/2;
+                if(centerX>=rect.left && centerX<=rect.right && centerY>=rect.top && centerY<=rect.bottom){
+                    checkDrop(item, zone);
+                    dropped = true;
+                }
+            });
+            if(!dropped) checkDrop(item,null);
+        }, {once:true});
     });
 }
 
-items.forEach(item => makeDraggable(item));
+items.forEach(item=>makeDraggable(item));
 
-dropzones.forEach(zone => {
-    zone.addEventListener("dragover", e => e.preventDefault());
-    zone.addEventListener("drop", e => { 
+dropzones.forEach(zone=>{
+    zone.addEventListener("dragover", e=>e.preventDefault());
+    zone.addEventListener("drop", e=>{
         e.preventDefault();
         const text = e.dataTransfer.getData("text");
-        const itemType = e.dataTransfer.getData("type");
-        let originalItem = [...document.querySelectorAll(".item")].find(i => i.innerText === text);
-        if(originalItem) checkDrop(originalItem, zone);
+        let original = [...items].find(i=>i.innerText===text);
+        if(original) checkDrop(original, zone);
     });
 });
 
-function checkDrop(item, zone=null) {
-    if(!zone) {
-        zone = item.dataset.type === "positivo" ? document.getElementById("gentiles") : document.getElementById("judios");
-    }
-
-    if(item.dataset.locked === "true") return;
+function checkDrop(item, zone=null){
+    if(!zone) zone = item.dataset.type==="positivo"?document.getElementById("gentiles"):document.getElementById("judios");
+    if(item.dataset.locked==="true") return;
 
     let marker = document.createElement("span");
-    marker.className = "marker";
+    marker.className="marker";
 
-    if(item.dataset.type === zone.dataset.type) {
-        marker.textContent = "✔";
-        marker.style.color = "green";
+    if(item.dataset.type===zone.dataset.type){
+        marker.textContent="✔";
+        marker.style.color="green";
         correctCount++;
         document.getElementById("correctSound").play();
-    } else {
-        marker.textContent = "✘";
-        marker.style.color = "red";
+    }else{
+        marker.textContent="✘";
+        marker.style.color="red";
         errorCount++;
         document.getElementById("wrongSound").play();
     }
 
     item.appendChild(marker);
-    item.dataset.locked = "true";
-    item.style.cursor = "default";
-    item.style.position = "relative";
+    item.dataset.locked="true";
+    item.style.cursor="default";
+    item.style.position="relative";
     zone.appendChild(item);
 
-    // mostrar versículo inmediatamente
+    let key = item.innerText.trim();
     let vContainer = document.getElementById("versiculos-items");
     let p = document.createElement("p");
-    p.innerHTML = `<b>${item.innerText}:</b> ${versiculos[item.innerText]}`;
+    p.innerHTML = `<b>${key}:</b> ${versiculos[key] || ""}`;
     vContainer.appendChild(p);
 
-    // verificar si terminaron
-    if((correctCount + errorCount) === totalItems) {
-        gameOver = true;
-        clearInterval(countdown);
-        showGameOverModal();
-    }
+    if((correctCount+errorCount)===totalItems){ gameOver=true; clearInterval(countdown); showGameOverModal(); }
 }
 
-function finishGame() {
-    items.forEach(item => item.dataset.locked = "true");
-    items.forEach(item => {
-        if(!item.parentNode.classList.contains("dropzone")) {
-            let zone = item.dataset.type === "positivo" ? document.getElementById("gentiles") : document.getElementById("judios");
-            checkDrop(item, zone);
+function finishGame(){
+    items.forEach(i=>i.dataset.locked="true");
+    items.forEach(i=>{
+        if(!i.parentNode.classList.contains("dropzone")){
+            let zone = i.dataset.type==="positivo"?document.getElementById("gentiles"):document.getElementById("judios");
+            checkDrop(i, zone);
         }
     });
 }
 
-function showGameOverModal() {
-    let msg = "🎉 ¡Juego completado! 🎉";
-    if(errorCount > 0) msg += "<br>Hubo algunos errores. ¡Repasa el texto y vuelve a intentarlo!";
-    document.getElementById("gameOverText").innerHTML = msg;
-    document.getElementById("gameOverModal").style.display = "flex";
+function showGameOverModal(){
+    let msg="🎉 ¡Juego completado! 🎉";
+    if(errorCount>0) msg+="<br>Hubo algunos errores. ¡Repasa el texto y vuelve a intentarlo!";
+    document.getElementById("gameOverText").innerHTML=msg;
+    document.getElementById("gameOverModal").style.display="flex";
 }
 </script>
-
 </body>
 </html>
