@@ -7,8 +7,8 @@
 <style>
   :root{--bg:#f3f3f3;--card-radius:12px}
   body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:18px;background:var(--bg);color:#111}
-  h1{font-size:20px;margin:0 0 8px;text-align:center;line-height:1.4}
-  .top{max-width:980px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 8px;text-align:center}
+  .top{max-width:980px;margin:0 auto;position:relative}
   #timer{font-weight:700;color:#b71c1c;margin-top:6px;text-align:center}
   .container{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:18px}
   .dropzone{flex:0 1 320px;min-height:140px;border-radius:12px;border:2px dashed #444;padding:12px;background:#fff;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;align-items:center;transition:height .25s ease}
@@ -29,15 +29,23 @@
     .dropzone{flex-basis:90%}
     .item{width:96px;height:96px}
   }
+  /* Logo marca de agua */
+  #logoMarcaAgua {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 80px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+  }
 </style>
 </head>
 <body>
 <div class="top">
-  <h1>
-    La exhortación de Pablo en Antioquía (3ª. Parte)<br>
-    Regocijo y persecución por la Palabra<br>
-    Hechos 13:42-52
-  </h1>
+  <h1>La exhortación de Pablo en Antioquía (3ª. Parte)<br>
+  Regocijo y persecución por la Palabra<br>
+  Hechos 13:42-52</h1>
   <div id="timer">Tiempo: 60</div>
 
   <div class="container">
@@ -56,7 +64,7 @@
     <div class="item-wrapper"><div class="item" data-type="positivo" style="background:#FDD835;color:#111">Gozo</div></div>
 
     <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#FB8C00">Celos</div></div>
-    <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#8E24AA">Contradic<br>ción</div></div>
+    <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#8E24AA">Contradicción</div></div>
     <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#00ACC1">Blasfemia</div></div>
     <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#D81B60">Persecución</div></div>
   </div>
@@ -65,7 +73,7 @@
   <audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
 
   <div id="versiculos">
-    <h3>Versículos de referencia:</h3>
+    <h3>Versículos (se muestran conforme coloques):</h3>
     <div id="versiculos-items"></div>
   </div>
 
@@ -76,6 +84,9 @@
     </div>
   </div>
 </div>
+
+<!-- Logo como marca de agua -->
+<img src="logo.png" id="logoMarcaAgua" alt="Logo Iglesia">
 
 <script>
 const versiculos = {
@@ -118,7 +129,7 @@ let originalParent = null;
 function onStart(e){
   if(gameOver) return;
   const isTouch = e.type==="touchstart";
-  const ev = isTouch ? e.touches[0] : e;
+  const ev = isTouch?e.touches[0]:e;
   const wrapper = this.parentElement;
   const item = this;
   if(item.dataset.locked==="true") return;
@@ -127,13 +138,13 @@ function onStart(e){
   originalParent = wrapper.parentElement;
 
   const rect = wrapper.getBoundingClientRect();
-  offsetX = ev.clientX - rect.left;
-  offsetY = ev.clientY - rect.top;
+  offsetX = ev.clientX - rect.left + window.scrollX;
+  offsetY = ev.clientY - rect.top + window.scrollY;
 
   document.body.appendChild(wrapper);
-  wrapper.style.position = "fixed"; // fixed evita problemas con scroll
+  wrapper.style.position = "absolute";
   wrapper.style.left = rect.left + "px";
-  wrapper.style.top  = rect.top + "px";
+  wrapper.style.top  = rect.top  + "px";
   wrapper.style.zIndex = 9999;
 
   if(isTouch) e.preventDefault();
@@ -142,11 +153,11 @@ function onStart(e){
 function onMove(e){
   if(!current) return;
   const isTouch = e.type==="touchmove";
-  const ev = isTouch ? e.touches[0] : e;
+  const ev = isTouch?e.touches[0]:e;
   if(isTouch) e.preventDefault();
 
-  current.style.left = (ev.clientX - offsetX) + "px";
-  current.style.top  = (ev.clientY - offsetY) + "px";
+  current.style.left = (ev.clientX - offsetX + window.scrollX) + "px";
+  current.style.top  = (ev.clientY - offsetY + window.scrollY) + "px";
 }
 
 function onEnd(e){
@@ -181,7 +192,6 @@ function onEnd(e){
     wrapper.style.top = "";
     wrapper.style.zIndex = "";
   }
-
   current = null;
 }
 
