@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>La exhortación de Pablo en Antioquía (3ª. Parte) - Regocijo y persecución por la Palabra - Hechos 13:42-52</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f3f3f3;
+        padding: 20px;
+        text-align: center;
+    }
+    h1 { margin-bottom: 10px; }
+
+    #timer {
+        font-size: 22px;
+        font-weight: bold;
+        color: #d32f2f;
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .dropzone {
+        width: 40%;
+        min-height: 250px;
+        padding: 20px;
+        border: 3px dashed #555;
+        border-radius: 10px;
+        background: #fff;
+        position: relative;
+    }
+
+    .images {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .item {
+        width: 120px;
+        height: 120px;
+        border-radius: 10px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        cursor: grab;
+        user-select: none;
+        position: relative;
+    }
+
+    #versiculos {
+        margin-top: 40px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        text-align: left;
+        width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .marker {
+        position: absolute;
+        font-size: 24px;
+        font-weight: bold;
+        top: 0;
+        right: 0;
+        padding: 5px;
+        border-radius: 50%;
+    }
+
+    /* Modal de mensaje de fin */
+    #gameOverModal {
+        display: none;
+        position: fixed;
+        top:0; left:0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.5s;
+    }
+
+    #gameOverContent {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        max-width: 500px;
+        animation: popIn 0.5s;
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; } 
+        to { opacity: 1; }
+    }
+
+    #gameOverContent button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border: none;
+        background: #1976d2;
+        color: white;
+        border-radius: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>La exhortación de Pablo en Antioquía (3ª. Parte)<br>
+Regocijo y persecución por la Palabra<br>
+Hechos 13:42-52</h1>
+
+<div id="timer">Tiempo: 60</div>
+
+<h3>Arrastra cada reacción al grupo correcto</h3>
+
+<div class="container">
+    <div id="judios" class="dropzone" data-type="negativo">
+        <h2>Judíos</h2>
+    </div>
+
+    <div id="gentiles" class="dropzone" data-type="positivo">
+        <h2>Gentiles</h2>
+    </div>
+</div>
+
+<div class="images" id="imagenes">
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Regocijo</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Glorificar la Palabra</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Fe</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Gozo</div>
+
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Celos</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Contradicción</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Blasfemia</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Persecución</div>
+</div>
+
+<!-- SONIDOS -->
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+
+<div id="versiculos">
+    <h2>Versículos:</h2>
+    <div id="versiculos-items"></div>
+</div>
+
+<!-- Modal de final de juego -->
+<div id="gameOverModal">
+    <div id="gameOverContent">
+        <div id="gameOverText"></div>
+        <button onclick="location.reload()">Jugar de nuevo</button>
+    </div>
+</div>
+
+<script>
+let items = document.querySelectorAll(".item");
+let dropzones = document.querySelectorAll(".dropzone");
+let totalItems = items.length;
+let correctCount = 0;
+let errorCount = 0;
+let gameOver = false;
+
+let timer = 60;
+let timerElement = document.getElementById("timer");
+let countdown = setInterval(() => {
+    timer--;
+    timerElement.textContent = "Tiempo: " + timer;
+
+    if (timer <= 0) {
+        clearInterval(countdown);
+        gameOver = true;
+        finishGame();
+    }
+}, 1000);
+
+// Versículos asociados
+const versiculos = {
+    "Regocijo": "Hechos 13:48",
+    "Glorificar la Palabra": "Hechos 13:48",
+    "Fe": "Hechos 13:48",
+    "Gozo": "Hechos 13:52",
+    "Celos": "Hechos 13:45",
+    "Contradicción": "Hechos 13:45",
+    "Blasfemia": "Hechos 13:45",
+    "Persecución": "Hechos 13:52"
+};
+
+// Drag and Drop
+items.forEach(item => {
+    item.addEventListener("dragstart", e => {
+        if(gameOver || item.dataset.locked === "true") e.preventDefault();
+        e.dataTransfer.setData("type", item.dataset.type);
+        e.dataTransfer.setData("text", item.innerText);
+    });
+});
+
+dropzones.forEach(zone => {
+    zone.addEventListener("dragover", e => e.preventDefault());
+
+    zone.addEventListener("drop", e => {
+        if(gameOver) return;
+        e.preventDefault();
+
+        const itemType = e.dataTransfer.getData("type");
+        const text = e.dataTransfer.getData("text");
+        const zoneType = zone.dataset.type;
+
+        let originalItem = [...document.querySelectorAll(".item")]
+            .find(i => i.innerText === text);
+        if (!originalItem) return;
+
+        if (!originalItem.querySelector(".marker")) {
+            let marker = document.createElement("span");
+            marker.className = "marker";
+
+            if (itemType === zoneType) {
+                document.getElementById("correctSound").play();
+                marker.textContent = "✔";
+                marker.style.color = "green";
+                correctCount++;
+            } else {
+                document.getElementById("wrongSound").play();
+                marker.textContent = "✘";
+                marker.style.color = "red";
+                errorCount++;
+            }
+
+            originalItem.appendChild(marker);
+            originalItem.dataset.locked = "true"; // Bloquear para no mover más
+
+            // Mostrar versículo relacionado inmediatamente
+            let vContainer = document.getElementById("versiculos-items");
+            let p = document.createElement("p");
+            p.innerHTML = `<b>${text}:</b> ${versiculos[text]}`;
+            vContainer.appendChild(p);
+        }
+
+        originalItem.style.position = "relative";
+        originalItem.style.cursor = "default";
+        zone.appendChild(originalItem);
+
+        // Verificar si terminaron
+        if ((correctCount + errorCount) === totalItems) {
+            gameOver = true;
+            clearInterval(countdown);
+            showGameOverModal();
+        }
+    });
+});
+
+function finishGame() {
+    items.forEach(item => item.draggable = false);
+
+    // Para los que quedaron fuera de dropzone
+    items.forEach(item => {
+        if(!item.parentNode.classList.contains("dropzone")) {
+            let type = item.dataset.type;
+            let zone = type === "positivo" ? document.getElementById("gentiles") : document.getElementById("judios");
+
+            if(!item.querySelector(".marker")) {
+                let marker = document.createElement("span");
+                marker.className = "marker";
+                marker.textContent = "✘";
+                marker.style.color = "red";
+                item.appendChild(marker);
+
+                let vContainer = document.getElementById("versiculos-items");
+                let p = document.createElement("p");
+                p.innerHTML = `<b>${item.innerText}:</b> ${versiculos[item.innerText]}`;
+                vContainer.appendChild(p);
+            }
+
+            item.dataset.locked = "true"; // Bloquear al colocar
+            zone.appendChild(item);
+        }
+    });
+
+    showGameOverModal();
+}
+
+function showGameOverModal() {
+    let msg = "🎉 ¡Juego completado! 🎉";
+    if(errorCount > 0) {
+        msg += "<br>Hubo algunos errores. ¡Repasa el texto y vuelve a intentarlo!";
+    }
+    document.getElementById("gameOverText").innerHTML = msg;
+    document.getElementById("gameOverModal").style.display = "flex";
+}
+</script>
+
+</body>
+</html>
