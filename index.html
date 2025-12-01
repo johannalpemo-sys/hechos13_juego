@@ -1,217 +1,352 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>La exhortación de Pablo en Antioquía - Juego</title>
+<meta charset="UTF-8" />
+<title>La exhortación de Pablo en Antioquía (3ª Parte) - Hechos 13:42-52</title>
+
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;background:#f6f6f6;text-align:center}
-  h1{font-size:20px;margin:0 0 10px}
-  .top{max-width:900px;margin:0 auto}
-  .dropzones{display:flex;gap:20px;justify-content:center;margin:18px 0;flex-wrap:wrap}
-  .dropzone{width:170px;height:170px;border-radius:10px;border:3px dashed #444;position:relative;background:#fff;box-sizing:border-box;padding:8px}
-  #jews{background:#fde0dc}
-  #gentiles{background:#e0f7fa}
-  .label{position:absolute;left:8px;top:8px;font-weight:700;color:#222}
-  .optionsArea{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-  .card{
-    width:110px;height:110px;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;
-    font-weight:700;padding:8px;text-align:center;box-sizing:border-box;touch-action:none;user-select:none;position:relative;
-  }
-  .marker{position:absolute;top:6px;right:6px;font-size:20px;font-weight:900}
-  #verso{margin-top:18px;min-height:48px}
-  button{margin-top:12px;padding:8px 14px;border-radius:8px;border:0;background:#1976d2;color:#fff}
+    body {
+        font-family: Arial, sans-serif;
+        background: #f3f3f3;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 10px; }
+    #timer { font-size: 22px; font-weight: bold; color: #d32f2f; }
+
+    /* Contenedor principal */
+    .container {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        gap: 20px;
+    }
+
+    /* Dropzones que CRECEN automáticamente */
+    .dropzone {
+        width: 40%;
+        min-height: 180px;
+        background: white;
+        border: 3px dashed #555;
+        border-radius: 10px;
+        padding: 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: all 0.3s ease;
+    }
+
+    #judios { background: #fde0dc; }
+    #gentiles { background: #e0f7fa; }
+
+    /* Tarjetas "item" */
+    .item {
+        width: 120px;
+        height: 120px;
+        border-radius: 12px;
+        color: white;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        text-align: center;
+        font-size: 15px;
+        cursor: grab;
+        user-select: none;
+        position: relative;
+    }
+
+    /* Opciones */
+    #imagenes {
+        margin-top: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    /* Marcador ✔ ✘ */
+    .marker {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    /* Versículos */
+    #versiculos {
+        margin-top: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    /* Modal final */
+    #gameOverModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    #gameOverContent {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 450px;
+        animation: popIn .4s;
+    }
+
+    @keyframes popIn {
+        from { transform: scale(.6); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
 </style>
 </head>
+
 <body>
 
-<div class="top">
-  <h1>La exhortación de Pablo en Antioquía (3ª Parte)</h1>
-  <div class="dropzones">
-    <div id="jews" class="dropzone" data-zone="jews">
-      <div class="label">Judíos</div>
+<h1>La exhortación de Pablo en Antioquía (3ª Parte)<br>Regocijo y persecución por la Palabra<br>Hechos 13:42-52</h1>
+
+<div id="timer">Tiempo: 60</div>
+
+<h3>Arrastra cada reacción al grupo correcto</h3>
+
+<div class="container">
+    <div id="judios" class="dropzone" data-type="negativo">
+        <h2>Judíos</h2>
     </div>
-    <div id="gentiles" class="dropzone" data-zone="gentiles">
-      <div class="label">Gentiles</div>
+
+    <div id="gentiles" class="dropzone" data-type="positivo">
+        <h2>Gentiles</h2>
     </div>
-  </div>
+</div>
 
-  <div id="verso">Versículos aparecerán aquí al colocar una respuesta.</div>
+<!-- Tarjetas -->
+<div id="imagenes">
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Regocijo</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#1E88E5;">Glorificar la Palabra</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#FDD835;">Fe</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#FB8C00;">Gozo</div>
 
-  <div class="optionsArea" id="optionsArea">
-    <!-- cards se generan por JS -->
-  </div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Celos</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#8E24AA;">Contradicción</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#00ACC1;">Blasfemia</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#D81B60;">Persecución</div>
+</div>
 
-  <div style="text-align:center">
-    <button id="resetBtn">Reiniciar</button>
-  </div>
+<!-- Audios -->
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+
+<div id="versiculos">
+    <h2>Versículos:</h2>
+    <div id="versiculos-items"></div>
+</div>
+
+<!-- Modal fin -->
+<div id="gameOverModal">
+    <div id="gameOverContent">
+        <div id="gameOverText"></div>
+        <button onclick="location.reload()">Jugar de nuevo</button>
+    </div>
 </div>
 
 <script>
-/* ---------- datos (puedes editarlos) ---------- */
-const respuestas = [
-  { texto: "Glorificar la Palabra", zona: "gentiles", verso: "Hechos 13:48 — Los gentiles se regocijaron y glorificaron la palabra del Señor." },
-  { texto: "Regocijo", zona: "gentiles", verso: "Hechos 13:48 — Los gentiles se regocijaron." },
-  { texto: "Fe", zona: "gentiles", verso: "Hechos 13:48 — Creyeron los que estaban ordenados para vida eterna." },
-  { texto: "Gozo", zona: "gentiles", verso: "Hechos 13:52 — Los discípulos estaban llenos de gozo y del Espíritu Santo." },
-  { texto: "Celos", zona: "jews", verso: "Hechos 13:45 — Los judíos se llenaron de celos." },
-  { texto: "Contradicción", zona: "jews", verso: "Hechos 13:45 — Rebatían y contradecían a Pablo." },
-  { texto: "Blasfemia", zona: "jews", verso: "Hechos 13:45 — Algunos llegaban a blasfemar." },
-  { texto: "Persecución", zona: "jews", verso: "Hechos 13:50 — Levantaron persecución y los expulsaron." }
-];
+// =========================
+// VARIABLES DEL JUEGO
+// =========================
+let items = document.querySelectorAll(".item");
+let dropzones = document.querySelectorAll(".dropzone");
+let totalItems = items.length;
+let correctCount = 0;
+let errorCount = 0;
+let gameOver = false;
 
-const colores = ["#E53935","#43A047","#1E88E5","#FDD835","#FB8C00","#8E24AA","#00ACC1","#D81B60"];
+// Versículos
+const versiculos = {
+    "Regocijo": "Hechos 13:48",
+    "Glorificar la Palabra": "Hechos 13:48",
+    "Fe": "Hechos 13:48",
+    "Gozo": "Hechos 13:52",
+    "Celos": "Hechos 13:45",
+    "Contradicción": "Hechos 13:45",
+    "Blasfemia": "Hechos 13:45",
+    "Persecución": "Hechos 13:52"
+};
 
-/* ---------- crear tarjetas ---------- */
-const optionsArea = document.getElementById('optionsArea');
-respuestas.forEach((r,i)=>{
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.textContent = r.texto;
-  card.style.background = colores[i % colores.length];
-  card.dataset.target = r.zona;
-  card.dataset.verso = r.verso;
-  card.dataset.index = i;
-  // Guardamos posición inicial container
-  card.dataset.origin = 'options';
-  optionsArea.appendChild(card);
-});
+// =========================
+// TIMER
+// =========================
+let timer = 60;
+let timerEl = document.getElementById("timer");
+let countdown = setInterval(() => {
+    if (gameOver) return;
+    timer--;
+    timerEl.textContent = "Tiempo: " + timer;
 
-/* ---------- utilidades ---------- */
-const dropzones = Array.from(document.querySelectorAll('.dropzone'));
-const cards = Array.from(document.querySelectorAll('.card'));
-const versoDiv = document.getElementById('verso');
-
-function rectOverlap(rectA, rectB){
-  return !(rectA.right < rectB.left || rectA.left > rectB.right || rectA.bottom < rectB.top || rectA.top > rectB.bottom);
-}
-
-/* ---------- manejo drag touch + mouse ---------- */
-let current = null;
-let offsetX = 0, offsetY = 0;
-
-function onPointerDown(e){
-  // soporta touch y mouse
-  const p = (e.touches ? e.touches[0] : e);
-  current = e.currentTarget;
-  if(current.dataset.locked === "true") { current = null; return; }
-  const rect = current.getBoundingClientRect();
-  offsetX = p.clientX - rect.left;
-  offsetY = p.clientY - rect.top;
-  // poner en body absoluta para moverse libremente
-  current.style.position = 'absolute';
-  current.style.zIndex = 9999;
-  // evita scroll en touch
-  if(e.touches) e.preventDefault();
-}
-
-function onPointerMove(e){
-  if(!current) return;
-  const p = (e.touches ? e.touches[0] : e);
-  const x = p.clientX - offsetX;
-  const y = p.clientY - offsetY;
-  current.style.left = (x + window.pageXOffset) + 'px';
-  current.style.top  = (y + window.pageYOffset) + 'px';
-  // evitar que el navegador haga scroll accidentalmente al arrastrar en móvil
-  if(e.touches) e.preventDefault();
-}
-
-function onPointerUp(e){
-  if(!current) return;
-  // detectar dropzone con la cual colisiona (centro del elemento)
-  const cRect = current.getBoundingClientRect();
-  const center = { x: cRect.left + cRect.width/2, y: cRect.top + cRect.height/2 };
-
-  let placedZone = null;
-  for(const zone of dropzones){
-    const zRect = zone.getBoundingClientRect();
-    if(center.x >= zRect.left && center.x <= zRect.right && center.y >= zRect.top && center.y <= zRect.bottom) {
-      placedZone = zone;
-      break;
+    if (timer <= 0) {
+        clearInterval(countdown);
+        finishGame();
     }
-  }
+}, 1000);
 
-  if(placedZone){
-    // append the card into the dropzone and center it relative to the dropzone
-    placedZone.appendChild(current);
-    current.style.position = 'absolute';
-    // ensure dropzone is positioned (it is by CSS)
-    const zRect = placedZone.getBoundingClientRect();
-    const cardRect = current.getBoundingClientRect();
-    // compute left/top relative to dropzone
-    const left = (zRect.width - cardRect.width)/2;
-    const top  = (zRect.height - cardRect.height)/2;
-    // set relative to dropzone (absolute child)
-    current.style.left = left + 'px';
-    current.style.top  = top  + 'px';
-    current.dataset.locked = "true";              // lock it
-    showMarker(current);                          // show ✔/✘ and verse
-  } else {
-    // si no lo suelta en zona, regresarlo al contenedor de opciones (o dejar donde esté según prefieras)
-    // Lo regresamos al área de opciones y quitamos estilos absolutos para que vuelva a fluir
-    const origin = optionsArea;
-    origin.appendChild(current);
-    current.style.position = 'relative';
-    current.style.left = '';
-    current.style.top = '';
-    current.style.zIndex = '';
-  }
 
-  // limpiar
-  current = null;
-}
-
-/* attach listeners */
-cards.forEach(card=>{
-  // pointer events (works for mouse + touch when using these handlers)
-  card.addEventListener('touchstart', onPointerDown, {passive:false});
-  card.addEventListener('mousedown', onPointerDown);
+// =========================
+// DRAG & DROP PARA MOUSE
+// =========================
+items.forEach(item => {
+    item.addEventListener("dragstart", e => {
+        if (item.dataset.locked === "true" || gameOver) e.preventDefault();
+        e.dataTransfer.setData("id", item.innerText);
+    });
 });
 
-document.addEventListener('touchmove', onPointerMove, {passive:false});
-document.addEventListener('mousemove', onPointerMove);
-document.addEventListener('touchend', onPointerUp);
-document.addEventListener('mouseup', onPointerUp);
+dropzones.forEach(zone => {
+    zone.addEventListener("dragover", e => e.preventDefault());
+    zone.addEventListener("drop", e => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("id");
+        let item = [...items].find(x => x.innerText === id);
+        handleDrop(item, zone);
+    });
+});
 
-/* ---------- mostrar marcador y verso ---------- */
-function showMarker(card){
-  // evitar duplicados
-  if(card.querySelector('.marker')) return;
-  const mark = document.createElement('div');
-  mark.className = 'marker';
-  const targetZone = card.dataset.target;
-  // zone id mapping: usamos ids 'jews' y 'gentiles'
-  let zoneId = (targetZone === 'jews' || targetZone === 'jew' || targetZone === 'judios') ? 'jews' : 'gentiles';
-  // la zona real donde quedó:
-  const parentZone = card.parentElement;
-  const isCorrect = parentZone && parentZone.classList.contains('dropzone') && parentZone.id === zoneId;
-  mark.textContent = isCorrect ? '✔' : '✘';
-  mark.style.color = isCorrect ? 'green' : 'red';
-  card.appendChild(mark);
 
-  // mostrar verso (limpiamos el texto para que no muestre marcas)
-  const keyText = card.textContent.replace('✔','').replace('✘','').trim();
-  const verso = card.dataset.verso || '';
-  // mostrar en el div verso
-  const prefix = isCorrect ? 'Correcto — ' : 'Incorrecto — ';
-  versoDiv.innerText = `${prefix}${keyText}: ${verso}`;
+// =========================
+// TOUCH EVENTS PARA CELULAR
+// =========================
+items.forEach(item => {
+    item.addEventListener("touchstart", e => {
+        if (item.dataset.locked === "true" || gameOver) return;
+
+        let touch = e.touches[0];
+        let offsetX = touch.clientX - item.getBoundingClientRect().left;
+        let offsetY = touch.clientY - item.getBoundingClientRect().top;
+
+        item.style.position = "absolute";
+        item.style.zIndex = 999;
+
+        function moveAt(touchEvent) {
+            let t = touchEvent.touches[0];
+            item.style.left = t.clientX - offsetX + "px";
+            item.style.top = t.clientY - offsetY + "px";
+        }
+
+        function onMove(e2) { moveAt(e2); }
+
+        document.addEventListener("touchmove", onMove);
+
+        item.addEventListener("touchend", e3 => {
+            document.removeEventListener("touchmove", onMove);
+
+            let droppedZone = [...dropzones].find(z => {
+                let rect = z.getBoundingClientRect();
+                return (
+                    touch.clientX > rect.left &&
+                    touch.clientX < rect.right &&
+                    touch.clientY > rect.top &&
+                    touch.clientY < rect.bottom
+                );
+            });
+
+            if (droppedZone) handleDrop(item, droppedZone);
+            else {
+                // Regresar al origen
+                item.style.position = "static";
+            }
+
+        }, { once: true });
+    });
+});
+
+
+// =========================
+// FUNCIÓN CENTRAL: HANDLE DROP
+// =========================
+function handleDrop(item, zone) {
+    if (!item || !zone || item.dataset.locked === "true" || gameOver) return;
+
+    let mark = document.createElement("div");
+    mark.className = "marker";
+
+    if (item.dataset.type === zone.dataset.type) {
+        mark.textContent = "✔";
+        mark.style.color = "green";
+        correctCount++;
+        document.getElementById("correctSound").play();
+    } else {
+        mark.textContent = "✘";
+        mark.style.color = "red";
+        errorCount++;
+        document.getElementById("wrongSound").play();
+    }
+
+    item.appendChild(mark);
+
+    // Bloquear
+    item.dataset.locked = "true";
+    item.style.position = "static";
+    item.style.cursor = "default";
+
+    // insertar dentro del dropzone
+    zone.appendChild(item);
+
+    // Versículo
+    let p = document.createElement("p");
+    p.innerHTML = `<b>${item.innerText}:</b> ${versiculos[item.innerText]}`;
+    document.getElementById("versiculos-items").appendChild(p);
+
+    if (correctCount + errorCount === totalItems) endGame();
 }
 
-/* ---------- reset ---------- */
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  // mover cada tarjeta a optionsArea y reset styles/flags
-  const allCards = Array.from(document.querySelectorAll('.card'));
-  allCards.forEach(c=>{
-    optionsArea.appendChild(c);
-    c.style.position = 'relative';
-    c.style.left = '';
-    c.style.top = '';
-    c.style.zIndex = '';
-    c.dataset.locked = '';
-    const m = c.querySelector('.marker'); if(m) m.remove();
-  });
-  versoDiv.innerText = 'Versículos aparecerán aquí al colocar una respuesta.';
-});
+
+// =========================
+// FIN DEL JUEGO
+// =========================
+function finishGame() {
+    gameOver = true;
+    clearInterval(countdown);
+
+    // Mover automáticamente faltantes
+    items.forEach(item => {
+        if (!item.dataset.locked) {
+            let zone = item.dataset.type === "positivo"
+                ? document.getElementById("gentiles")
+                : document.getElementById("judios");
+            handleDrop(item, zone);
+        }
+    });
+
+    endGame();
+}
+
+function endGame() {
+    gameOver = true;
+    clearInterval(countdown);
+
+    let msg = "🎉 ¡Juego completado! 🎉<br>";
+    if (errorCount > 0) {
+        msg += "Hubo algunos errores, ¡pero puedes seguir repasando el pasaje! 🙌";
+    }
+
+    document.getElementById("gameOverText").innerHTML = msg;
+    document.getElementById("gameOverModal").style.display = "flex";
+}
+
 </script>
 </body>
 </html>
