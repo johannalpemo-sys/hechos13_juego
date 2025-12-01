@@ -16,9 +16,9 @@
   #gentiles{background:#e0f7fa}
   .dropzone h2{margin:0;font-size:16px;align-self:flex-start}
   #imagenes{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:18px}
-  .item{width:110px;height:110px;border-radius:var(--card-radius);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-align:center;padding:8px;box-sizing:border-box;user-select:none;touch-action:none;cursor:grab}
-  .marker{position:absolute;font-size:24px;font-weight:900;top:-8px;right:-8px}
-  .item-wrapper{position:relative;display:inline-block} /* envolver para marker absolute */
+  .item{width:110px;height:110px;border-radius:var(--card-radius);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-align:center;padding:8px;box-sizing:border-box;user-select:none;touch-action:none;cursor:grab;position:relative}
+  .item-wrapper{position:relative;display:inline-block} /* para marcador absoluto */
+  .marker{position:absolute;top:-6px;right:-6px;font-size:26px;font-weight:900;z-index:10;pointer-events:none}
   #versiculos{margin:20px auto 0;background:#fff;padding:12px;border-radius:10px;max-width:900px;text-align:left;display:block}
   #versiculos h3{margin:0 0 8px}
   #versiculos-items p{margin:6px 0}
@@ -38,19 +38,16 @@
   <h1>La exhortación de Pablo en Antioquía (3ª Parte)</h1>
   <div id="timer">Tiempo: 60</div>
 
-  <div class="container" aria-hidden="false">
+  <div class="container">
     <div id="judios" class="dropzone" data-type="negativo">
       <h2>Judíos</h2>
-      <!-- items appended here will make the box grow -->
     </div>
-
     <div id="gentiles" class="dropzone" data-type="positivo">
       <h2>Gentiles</h2>
     </div>
   </div>
 
-  <div id="imagenes" aria-live="polite">
-    <!-- tarjetas iniciales (colores distintos) -->
+  <div id="imagenes">
     <div class="item-wrapper"><div class="item" data-type="positivo" style="background:#E53935">Regocijo</div></div>
     <div class="item-wrapper"><div class="item" data-type="positivo" style="background:#43A047">Glorificar la Palabra</div></div>
     <div class="item-wrapper"><div class="item" data-type="positivo" style="background:#1E88E5">Fe</div></div>
@@ -62,7 +59,7 @@
     <div class="item-wrapper"><div class="item" data-type="negativo" style="background:#D81B60">Persecución</div></div>
   </div>
 
-  <!-- sonidos opcionales (pon archivos o coméntalos) -->
+  <!-- sonidos opcionales -->
   <audio id="correctSound" src="correct.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
 
@@ -71,7 +68,7 @@
     <div id="versiculos-items"></div>
   </div>
 
-  <div id="gameOverModal" role="dialog" aria-modal="true">
+  <div id="gameOverModal">
     <div id="gameOverContent">
       <div id="gameOverText"></div>
       <button id="restartBtn">Jugar de nuevo</button>
@@ -80,21 +77,18 @@
 </div>
 
 <script>
-/* ====== Config ====== */
 const versiculos = {
-  "Regocijo": "Hechos 13:48 — Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor.",
-  "Glorificar la Palabra": "Hechos 13:48 — Los gentiles glorificaron la palabra del Señor.",
-  "Fe": "Hechos 13:48 — Creyeron los que estaban ordenados para vida eterna.",
-  "Gozo": "Hechos 13:52 — Los discípulos estaban llenos de gozo y del Espíritu Santo.",
-  "Celos": "Hechos 13:45 — Los judíos se llenaron de celos.",
-  "Contradicción": "Hechos 13:45 — Rebatían y contradecían a Pablo.",
-  "Blasfemia": "Hechos 13:45 — Algunos llegaban a blasfemar.",
-  "Persecución": "Hechos 13:50 — Levantaron persecución contra Pablo y Bernabé."
+  "Regocijo":"Hechos 13:48 — Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor.",
+  "Glorificar la Palabra":"Hechos 13:48 — Los gentiles glorificaron la palabra del Señor.",
+  "Fe":"Hechos 13:48 — Creyeron los que estaban ordenados para vida eterna.",
+  "Gozo":"Hechos 13:52 — Los discípulos estaban llenos de gozo y del Espíritu Santo.",
+  "Celos":"Hechos 13:45 — Los judíos se llenaron de celos.",
+  "Contradicción":"Hechos 13:45 — Rebatían y contradecían a Pablo.",
+  "Blasfemia":"Hechos 13:45 — Algunos llegaban a blasfemar.",
+  "Persecución":"Hechos 13:50 — Levantaron persecución contra Pablo y Bernabé."
 };
 
-/* ====== Estado ====== */
 let items = Array.from(document.querySelectorAll(".item"));
-let wrappers = Array.from(document.querySelectorAll(".item-wrapper"));
 let dropzones = Array.from(document.querySelectorAll(".dropzone"));
 const imgsContainer = document.getElementById("imagenes");
 const versosContainer = document.getElementById("versiculos-items");
@@ -109,32 +103,25 @@ let correctCount = 0;
 let errorCount = 0;
 let gameOver = false;
 
-/* ====== Timer ====== */
 function tick(){
   if(gameOver) return;
   timer--;
   timerEl.textContent = "Tiempo: " + timer;
-  if(timer <= 0) { clearInterval(countdown); finishGame(); }
+  if(timer<=0){ clearInterval(countdown); finishGame(); }
 }
 
-/* ====== Drag & Touch logic ======
-   Strategy:
-   - On pointer/touchstart: record offsets, set dragging wrapper absolute (append to body)
-   - Move with pointer/touchmove
-   - On end: check which dropzone's rect contains center; if found, append wrapper into that dropzone and set wrapper/style static so it flows -> dropzone grows.
-   - If no dropzone found, return wrapper to original container (imagenes)
-*/
+/* ====== Drag & Touch ====== */
 let current = null;
 let offsetX = 0, offsetY = 0;
 let originalParent = null;
 
 function onStart(e){
   if(gameOver) return;
-  const isTouch = e.type === "touchstart";
-  const ev = isTouch ? e.touches[0] : e;
-  const wrapper = this.parentElement; // .item-wrapper
+  const isTouch = e.type==="touchstart";
+  const ev = isTouch?e.touches[0]:e;
+  const wrapper = this.parentElement;
   const item = this;
-  if(item.dataset.locked === "true") return;
+  if(item.dataset.locked==="true") return;
 
   current = wrapper;
   originalParent = wrapper.parentElement;
@@ -143,7 +130,6 @@ function onStart(e){
   offsetX = ev.clientX - rect.left;
   offsetY = ev.clientY - rect.top;
 
-  // move wrapper to body to move freely
   document.body.appendChild(wrapper);
   wrapper.style.position = "absolute";
   wrapper.style.left = rect.left + "px";
@@ -155,15 +141,12 @@ function onStart(e){
 
 function onMove(e){
   if(!current) return;
-  const isTouch = e.type === "touchmove";
-  const ev = isTouch ? e.touches[0] : e;
-  // prevent page scroll while dragging on touch
+  const isTouch = e.type==="touchmove";
+  const ev = isTouch?e.touches[0]:e;
   if(isTouch) e.preventDefault();
 
-  const x = ev.clientX - offsetX;
-  const y = ev.clientY - offsetY;
-  current.style.left = x + "px";
-  current.style.top  = y + "px";
+  current.style.left = (ev.clientX - offsetX) + "px";
+  current.style.top  = (ev.clientY - offsetY) + "px";
 }
 
 function onEnd(e){
@@ -171,136 +154,113 @@ function onEnd(e){
   const wrapper = current;
   const item = wrapper.querySelector(".item");
   const rect = wrapper.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top  + rect.height / 2;
+  const centerX = rect.left + rect.width/2;
+  const centerY = rect.top + rect.height/2;
 
-  // find dropzone whose rect contains center
   let placedZone = null;
   for(const zone of dropzones){
     const zr = zone.getBoundingClientRect();
-    if(centerX >= zr.left && centerX <= zr.right && centerY >= zr.top && centerY <= zr.bottom){
+    if(centerX>=zr.left && centerX<=zr.right && centerY>=zr.top && centerY<=zr.bottom){
       placedZone = zone;
       break;
     }
   }
 
   if(placedZone){
-    // append wrapper into dropzone so it becomes a child -> dropzone grows (flex column)
     placedZone.appendChild(wrapper);
     wrapper.style.position = "static";
     wrapper.style.left = "";
     wrapper.style.top = "";
     wrapper.style.zIndex = "";
-    // lock and mark
     markResult(item, placedZone);
   } else {
-    // return to original container (imagenes)
     imgsContainer.appendChild(wrapper);
     wrapper.style.position = "static";
     wrapper.style.left = "";
     wrapper.style.top = "";
     wrapper.style.zIndex = "";
   }
-
   current = null;
 }
 
-/* Attach listeners to each item */
-items.forEach(it => {
-  it.addEventListener("mousedown", onStart);
-  it.addEventListener("touchstart", onStart, {passive:false});
+items.forEach(it=>{
+  it.addEventListener("mousedown",onStart);
+  it.addEventListener("touchstart",onStart,{passive:false});
 });
-document.addEventListener("mousemove", onMove);
-document.addEventListener("touchmove", onMove, {passive:false});
-document.addEventListener("mouseup", onEnd);
-document.addEventListener("touchend", onEnd);
+document.addEventListener("mousemove",onMove);
+document.addEventListener("touchmove",onMove,{passive:false});
+document.addEventListener("mouseup",onEnd);
+document.addEventListener("touchend",onEnd);
 
-/* ====== handle drop result ====== */
 function markResult(item, zone){
-  if(item.dataset.locked === "true") return;
-  const key = (item.innerText || "").replace('✔','').replace('✘','').trim();
-  const expected = (item.dataset.type === "positivo") ? "positivo" : "negativo";
-  const zoneType = zone.dataset.type; // "positivo" or "negativo"
+  if(item.dataset.locked==="true") return;
+  const key = item.innerText.trim();
+  const correct = item.dataset.type===zone.dataset.type;
 
-  const correct = expected === zoneType;
-  // marker
-  const m = document.createElement("div");
-  m.className = "marker";
-  m.textContent = correct ? "✔" : "✘";
-  m.style.color = correct ? "green" : "red";
-  item.appendChild(m);
+  const wrapper = item.parentElement;
+  if(!wrapper.querySelector(".marker")){
+    const marker = document.createElement("div");
+    marker.className="marker";
+    marker.textContent = correct?"✔":"✘";
+    marker.style.color = correct?"green":"red";
+    wrapper.appendChild(marker);
+  }
 
-  // lock
-  item.dataset.locked = "true";
-  item.style.cursor = "default";
+  item.dataset.locked="true";
+  item.style.cursor="default";
 
-  // show verse
   const p = document.createElement("p");
-  p.innerHTML = `<strong>${key}:</strong> ${versiculos[key] || ""}`;
+  p.innerHTML=`<strong>${key}:</strong> ${versiculos[key] || ""}`;
   versosContainer.appendChild(p);
 
-  // sounds (optional)
   try{
     if(correct) document.getElementById("correctSound").play();
     else document.getElementById("wrongSound").play();
-  }catch(err){/* ignore audio errors on autoplay restrictions */}
+  }catch(err){}
 
   if(correct) correctCount++; else errorCount++;
 
-  // end if all
-  if((correctCount + errorCount) >= items.length) {
-    finishGame();
-  }
+  if((correctCount+errorCount)>=items.length) finishGame();
 }
 
-/* ====== finish game ====== */
 function finishGame(){
   gameOver = true;
   clearInterval(countdown);
-
-  // auto-place remaining unlocked items to their zones (so boxes grow)
   items.forEach(it=>{
-    if(it.dataset.locked !== "true"){
+    if(it.dataset.locked!=="true"){
       const wrapper = it.parentElement;
-      const targetZone = (it.dataset.type === "positivo") ? document.getElementById("gentiles") : document.getElementById("judios");
+      const targetZone = it.dataset.type==="positivo"?document.getElementById("gentiles"):document.getElementById("judios");
       targetZone.appendChild(wrapper);
-      wrapper.style.position = "static";
-      wrapper.style.left = "";
-      wrapper.style.top = "";
-      markResult(it, targetZone);
+      wrapper.style.position="static";
+      wrapper.style.left="";
+      wrapper.style.top="";
+      markResult(it,targetZone);
     }
   });
 
-  // show modal
   let msg = "🎉 ¡Juego completado! 🎉";
-  if(errorCount > 0) msg += `\nTuvo ${errorCount} error(es). ¡Repasa el pasaje y vuelve a intentarlo!`;
+  if(errorCount>0) msg += `\nTuvo ${errorCount} error(es). ¡Repasa el pasaje y vuelve a intentarlo!`;
   else msg += "\n¡Excelente, sin errores!";
-
   gameOverText.innerText = msg;
-  modal.style.display = "flex";
+  modal.style.display="flex";
 }
 
-/* restart */
-restartBtn.addEventListener("click", ()=>{
-  // reset state
-  correctCount = 0; errorCount = 0; gameOver = false;
-  versosContainer.innerHTML = "";
-  modal.style.display = "none";
-  timer = 60; timerEl.textContent = "Tiempo: " + timer;
-  clearInterval(countdown); countdown = setInterval(tick,1000);
+restartBtn.addEventListener("click",()=>{
+  correctCount=0; errorCount=0; gameOver=false;
+  versosContainer.innerHTML="";
+  modal.style.display="none";
+  timer=60; timerEl.textContent="Tiempo: "+timer;
+  clearInterval(countdown); countdown=setInterval(tick,1000);
 
-  // move all wrappers back to imgsContainer (in original order) and reset item lock/markers
-  const wrappers = Array.from(document.querySelectorAll('.item-wrapper'));
-  wrappers.forEach((w, idx)=>{
+  const wrappers = Array.from(document.querySelectorAll(".item-wrapper"));
+  wrappers.forEach(w=>{
     imgsContainer.appendChild(w);
-    w.style.position = "relative";
-    w.style.left = "";
-    w.style.top = "";
-    w.style.zIndex = "";
-    const it = w.querySelector('.item');
-    it.dataset.locked = "";
-    it.style.cursor = "grab";
-    const marker = w.querySelector('.marker');
+    w.style.position="relative";
+    w.style.left=""; w.style.top=""; w.style.zIndex="";
+    const it = w.querySelector(".item");
+    it.dataset.locked="";
+    it.style.cursor="grab";
+    const marker = w.querySelector(".marker");
     if(marker) marker.remove();
   });
 });
