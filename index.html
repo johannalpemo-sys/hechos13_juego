@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Hechos 13:42-52 - Juego Interactivo</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f3f3f3;
+        padding: 20px;
+        text-align: center;
+    }
+    h1 { margin-bottom: 10px; }
+
+    #timer {
+        font-size: 22px;
+        font-weight: bold;
+        color: #d32f2f;
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+    }
+
+    .dropzone {
+        width: 40%;
+        min-height: 250px;
+        padding: 20px;
+        border: 3px dashed #555;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .images {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .item {
+        width: 120px;
+        height: 120px;
+        border-radius: 10px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        cursor: grab;
+        user-select: none;
+    }
+
+    #versiculos {
+        margin-top: 40px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        display: none;
+        text-align: left;
+        width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Hechos 13:42–52 — Juego Interactivo</h1>
+<div id="timer">Tiempo: 60</div>
+
+<h3>Arrastra cada reacción al grupo correcto</h3>
+
+<div class="container">
+    <div id="judios" class="dropzone" data-type="negativo">
+        <h2>Judíos</h2>
+    </div>
+
+    <div id="gentiles" class="dropzone" data-type="positivo">
+        <h2>Gentiles</h2>
+    </div>
+</div>
+
+<div class="images" id="imagenes">
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Regocijo</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Glorificar Palabra</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Fe</div>
+    <div class="item" draggable="true" data-type="positivo" style="background:#4CAF50;">Gozo</div>
+
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Celos</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Contradicción</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Blasfemia</div>
+    <div class="item" draggable="true" data-type="negativo" style="background:#f44336;">Persecución</div>
+</div>
+
+<!-- SONIDOS -->
+<audio id="correctSound">
+    <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..." type="audio/mp3">
+</audio>
+<audio id="wrongSound">
+    <source src="data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCB..." type="audio/mp3">
+</audio>
+
+<div id="versiculos">
+    <h2>¡Juego completado! 🎉</h2>
+    <h3>Versículos relacionados:</h3>
+    <p><b>Hechos 13:48:</b> “Los gentiles, oyendo esto, se regocijaban y glorificaban la palabra del Señor...”</p>
+    <p><b>Hechos 13:45:</b> “Pero los judíos se llenaron de celos...”</p>
+    <p><b>Hechos 13:52:</b> “Los discípulos estaban llenos de gozo y del Espíritu Santo.”</p>
+</div>
+
+<script>
+    let items = document.querySelectorAll(".item");
+    let dropzones = document.querySelectorAll(".dropzone");
+    let totalItems = items.length;
+    let correctCount = 0;
+
+    let timer = 60;
+    let timerElement = document.getElementById("timer");
+    let countdown = setInterval(() => {
+        timer--;
+        timerElement.textContent = "Tiempo: " + timer;
+
+        if (timer <= 0) {
+            clearInterval(countdown);
+            alert("⏰ Se acabó el tiempo");
+        }
+    }, 1000);
+
+
+    items.forEach(item => {
+        item.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("type", item.dataset.type);
+            e.dataTransfer.setData("text", item.innerText);
+            e.dataTransfer.setData("id", item.innerText);
+        });
+    });
+
+    dropzones.forEach(zone => {
+        zone.addEventListener("dragover", e => e.preventDefault());
+
+        zone.addEventListener("drop", e => {
+            e.preventDefault();
+
+            const itemType = e.dataTransfer.getData("type");
+            const text = e.dataTransfer.getData("text");
+            const zoneType = zone.dataset.type;
+
+            let originalItem = [...document.querySelectorAll(".item")]
+                .find(i => i.innerText === text);
+
+            if (!originalItem) return;
+
+            if (itemType === zoneType) {
+                document.getElementById("correctSound").play();
+
+                alert("✔ ¡Correcto! \"" + text + "\" pertenece aquí.");
+
+                let newItem = document.createElement("div");
+                newItem.className = "item";
+                newItem.style.background = zoneType === "positivo" ? "#4CAF50" : "#f44336";
+                newItem.style.cursor = "default";
+                newItem.innerText = text;
+
+                zone.appendChild(newItem);
+
+                originalItem.remove();
+                correctCount++;
+
+                if (correctCount === totalItems) {
+                    document.getElementById("versiculos").style.display = "block";
+                    clearInterval(countdown);
+                }
+
+            } else {
+                document.getElementById("wrongSound").play();
+                alert("✘ Incorrecto. \"" + text + "\" NO pertenece a este grupo.");
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
