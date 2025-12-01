@@ -1,235 +1,217 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>La exhortación de Pablo en Antioquía</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>La exhortación de Pablo en Antioquía - Juego</title>
 <style>
-    body {
-        margin: 0;
-        padding: 20px;
-        font-family: Arial;
-        background: #fafafa;
-        text-align: center;
-    }
-
-    h1 {
-        font-size: 22px;
-        margin-bottom: 10px;
-    }
-
-    .container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
-    }
-
-    .options {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        max-width: 480px;
-    }
-
-    .draggable {
-        width: 110px;
-        height: 110px;
-        border-radius: 10px;
-        position: absolute;
-        touch-action: none;
-        user-select: none;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 15px;
-        color: white;
-        font-weight: bold;
-    }
-
-    .dropzones {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
-    .dropzone {
-        width: 150px;
-        height: 150px;
-        border: 3px dashed #000;
-        border-radius: 10px;
-        position: relative;
-    }
-
-    .mark {
-        position: absolute;
-        bottom: -25px;
-        font-size: 24px;
-        font-weight: bold;
-        width: 100%;
-        text-align: center;
-    }
-
-    #verso {
-        margin-top: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        min-height: 60px;
-    }
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;background:#f6f6f6;text-align:center}
+  h1{font-size:20px;margin:0 0 10px}
+  .top{max-width:900px;margin:0 auto}
+  .dropzones{display:flex;gap:20px;justify-content:center;margin:18px 0;flex-wrap:wrap}
+  .dropzone{width:170px;height:170px;border-radius:10px;border:3px dashed #444;position:relative;background:#fff;box-sizing:border-box;padding:8px}
+  #jews{background:#fde0dc}
+  #gentiles{background:#e0f7fa}
+  .label{position:absolute;left:8px;top:8px;font-weight:700;color:#222}
+  .optionsArea{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .card{
+    width:110px;height:110px;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;
+    font-weight:700;padding:8px;text-align:center;box-sizing:border-box;touch-action:none;user-select:none;position:relative;
+  }
+  .marker{position:absolute;top:6px;right:6px;font-size:20px;font-weight:900}
+  #verso{margin-top:18px;min-height:48px}
+  button{margin-top:12px;padding:8px 14px;border-radius:8px;border:0;background:#1976d2;color:#fff}
 </style>
 </head>
-
 <body>
 
-<h1>La exhortación de Pablo en Antioquía (3ª Parte)<br>Regocijo y persecución por la Palabra<br>Hechos 13:42-52</h1>
-
-<div class="container">
-    
-    <div id="options" class="options"></div>
-
-    <div class="dropzones">
-        <div id="jews" class="dropzone"></div>
-        <div id="gentiles" class="dropzone"></div>
+<div class="top">
+  <h1>La exhortación de Pablo en Antioquía (3ª Parte)</h1>
+  <div class="dropzones">
+    <div id="jews" class="dropzone" data-zone="jews">
+      <div class="label">Judíos</div>
     </div>
+    <div id="gentiles" class="dropzone" data-zone="gentiles">
+      <div class="label">Gentiles</div>
+    </div>
+  </div>
 
-    <div id="verso"></div>
+  <div id="verso">Versículos aparecerán aquí al colocar una respuesta.</div>
+
+  <div class="optionsArea" id="optionsArea">
+    <!-- cards se generan por JS -->
+  </div>
+
+  <div style="text-align:center">
+    <button id="resetBtn">Reiniciar</button>
+  </div>
 </div>
 
 <script>
-/* -------------------- DATOS --------------------- */
-
-const colores = [
-    "#FF5733", "#33FF57", "#3357FF", "#FF33A8",
-    "#33FFF5", "#A833FF", "#FFC733", "#FF8F33"
-];
-
+/* ---------- datos (puedes editarlos) ---------- */
 const respuestas = [
-    { texto: "Glorificar la Palabra", zona: "gentiles", verso: "Hechos 13:48" },
-    { texto: "Se opusieron a Pablo", zona: "jews", verso: "Hechos 13:45" },
-    { texto: "Creyeron muchos", zona: "gentiles", verso: "Hechos 13:48" },
-    { texto: "Persecución contra Pablo", zona: "jews", verso: "Hechos 13:50" }
+  { texto: "Glorificar la Palabra", zona: "gentiles", verso: "Hechos 13:48 — Los gentiles se regocijaron y glorificaron la palabra del Señor." },
+  { texto: "Regocijo", zona: "gentiles", verso: "Hechos 13:48 — Los gentiles se regocijaron." },
+  { texto: "Fe", zona: "gentiles", verso: "Hechos 13:48 — Creyeron los que estaban ordenados para vida eterna." },
+  { texto: "Gozo", zona: "gentiles", verso: "Hechos 13:52 — Los discípulos estaban llenos de gozo y del Espíritu Santo." },
+  { texto: "Celos", zona: "jews", verso: "Hechos 13:45 — Los judíos se llenaron de celos." },
+  { texto: "Contradicción", zona: "jews", verso: "Hechos 13:45 — Rebatían y contradecían a Pablo." },
+  { texto: "Blasfemia", zona: "jews", verso: "Hechos 13:45 — Algunos llegaban a blasfemar." },
+  { texto: "Persecución", zona: "jews", verso: "Hechos 13:50 — Levantaron persecución y los expulsaron." }
 ];
 
-/* ------------ CREAR LAS TARJETAS ------------ */
+const colores = ["#E53935","#43A047","#1E88E5","#FDD835","#FB8C00","#8E24AA","#00ACC1","#D81B60"];
 
-let optionsDiv = document.getElementById("options");
-
-respuestas.forEach((r, i) => {
-    let div = document.createElement("div");
-    div.classList.add("draggable");
-    div.innerText = r.texto;
-    div.dataset.target = r.zona;
-    div.dataset.verso = r.verso;
-    div.style.background = colores[i % colores.length];
-    div.style.position = "relative";
-    div.style.touchAction = "none";
-
-    optionsDiv.appendChild(div);
+/* ---------- crear tarjetas ---------- */
+const optionsArea = document.getElementById('optionsArea');
+respuestas.forEach((r,i)=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.textContent = r.texto;
+  card.style.background = colores[i % colores.length];
+  card.dataset.target = r.zona;
+  card.dataset.verso = r.verso;
+  card.dataset.index = i;
+  // Guardamos posición inicial container
+  card.dataset.origin = 'options';
+  optionsArea.appendChild(card);
 });
 
-/* ------------ DRAG & DROP PARA CELULAR + PC ------------ */
+/* ---------- utilidades ---------- */
+const dropzones = Array.from(document.querySelectorAll('.dropzone'));
+const cards = Array.from(document.querySelectorAll('.card'));
+const versoDiv = document.getElementById('verso');
 
-let draggables = document.querySelectorAll(".draggable");
-let dropzones = document.querySelectorAll(".dropzone");
-
-draggables.forEach(el => {
-
-    let offsetX = 0, offsetY = 0;
-
-    /* MOUSE */
-    el.addEventListener("mousedown", startDrag);
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("mouseup", endDrag);
-
-    /* TOUCH */
-    el.addEventListener("touchstart", startDrag);
-    document.addEventListener("touchmove", drag, { passive: false });
-    document.addEventListener("touchend", endDrag);
-
-    function startDrag(e) {
-        el.style.zIndex = 1000;
-        let point = e.touches ? e.touches[0] : e;
-
-        let rect = el.getBoundingClientRect();
-        offsetX = point.clientX - rect.left;
-        offsetY = point.clientY - rect.top;
-
-        el.dataset.dragging = "true";
-    }
-
-    function drag(e) {
-        if (el.dataset.dragging !== "true") return;
-
-        e.preventDefault();
-
-        let point = e.touches ? e.touches[0] : e;
-
-        let x = point.clientX - offsetX;
-        let y = point.clientY - offsetY;
-
-        el.style.position = "absolute";
-        el.style.left = x + "px";
-        el.style.top = y + "px";
-    }
-
-    function endDrag() {
-        if (el.dataset.dragging !== "true") return;
-        el.dataset.dragging = "false";
-
-        let placed = false;
-
-        dropzones.forEach(zone => {
-            let z = zone.getBoundingClientRect();
-            let d = el.getBoundingClientRect();
-
-            let overlap =
-                d.right > z.left &&
-                d.left < z.right &&
-                d.bottom > z.top &&
-                d.top < z.bottom;
-
-            if (overlap) {
-                placed = true;
-
-                // Acomodar al centro del dropzone
-                el.style.left = (z.left + (z.width - d.width) / 2) + "px";
-                el.style.top = (z.top + (z.height - d.height) / 2) + "px";
-
-                // Validar
-                validar(el, zone.id);
-            }
-        });
-
-        // Si no cayó en zona → se queda donde soltó (NO regresa)
-    }
-});
-
-/* ------------ VALIDACIÓN ------------ */
-
-function validar(el, zona) {
-    let correcta = el.dataset.target === zona;
-    let verso = document.getElementById("verso");
-
-    let mark = document.createElement("div");
-    mark.classList.add("mark");
-    mark.innerText = correcta ? "✔" : "✘";
-    mark.style.color = correcta ? "green" : "red";
-    el.appendChild(mark);
-
-    verso.innerText = correcta ?
-        "Correcto: " + el.dataset.verso :
-        "Incorrecto: " + el.dataset.verso;
-
-    // Bloquear
-    el.dataset.locked = "true";
-    el.style.pointerEvents = "none";
+function rectOverlap(rectA, rectB){
+  return !(rectA.right < rectB.left || rectA.left > rectB.right || rectA.bottom < rectB.top || rectA.top > rectB.bottom);
 }
-</script>
 
+/* ---------- manejo drag touch + mouse ---------- */
+let current = null;
+let offsetX = 0, offsetY = 0;
+
+function onPointerDown(e){
+  // soporta touch y mouse
+  const p = (e.touches ? e.touches[0] : e);
+  current = e.currentTarget;
+  if(current.dataset.locked === "true") { current = null; return; }
+  const rect = current.getBoundingClientRect();
+  offsetX = p.clientX - rect.left;
+  offsetY = p.clientY - rect.top;
+  // poner en body absoluta para moverse libremente
+  current.style.position = 'absolute';
+  current.style.zIndex = 9999;
+  // evita scroll en touch
+  if(e.touches) e.preventDefault();
+}
+
+function onPointerMove(e){
+  if(!current) return;
+  const p = (e.touches ? e.touches[0] : e);
+  const x = p.clientX - offsetX;
+  const y = p.clientY - offsetY;
+  current.style.left = (x + window.pageXOffset) + 'px';
+  current.style.top  = (y + window.pageYOffset) + 'px';
+  // evitar que el navegador haga scroll accidentalmente al arrastrar en móvil
+  if(e.touches) e.preventDefault();
+}
+
+function onPointerUp(e){
+  if(!current) return;
+  // detectar dropzone con la cual colisiona (centro del elemento)
+  const cRect = current.getBoundingClientRect();
+  const center = { x: cRect.left + cRect.width/2, y: cRect.top + cRect.height/2 };
+
+  let placedZone = null;
+  for(const zone of dropzones){
+    const zRect = zone.getBoundingClientRect();
+    if(center.x >= zRect.left && center.x <= zRect.right && center.y >= zRect.top && center.y <= zRect.bottom) {
+      placedZone = zone;
+      break;
+    }
+  }
+
+  if(placedZone){
+    // append the card into the dropzone and center it relative to the dropzone
+    placedZone.appendChild(current);
+    current.style.position = 'absolute';
+    // ensure dropzone is positioned (it is by CSS)
+    const zRect = placedZone.getBoundingClientRect();
+    const cardRect = current.getBoundingClientRect();
+    // compute left/top relative to dropzone
+    const left = (zRect.width - cardRect.width)/2;
+    const top  = (zRect.height - cardRect.height)/2;
+    // set relative to dropzone (absolute child)
+    current.style.left = left + 'px';
+    current.style.top  = top  + 'px';
+    current.dataset.locked = "true";              // lock it
+    showMarker(current);                          // show ✔/✘ and verse
+  } else {
+    // si no lo suelta en zona, regresarlo al contenedor de opciones (o dejar donde esté según prefieras)
+    // Lo regresamos al área de opciones y quitamos estilos absolutos para que vuelva a fluir
+    const origin = optionsArea;
+    origin.appendChild(current);
+    current.style.position = 'relative';
+    current.style.left = '';
+    current.style.top = '';
+    current.style.zIndex = '';
+  }
+
+  // limpiar
+  current = null;
+}
+
+/* attach listeners */
+cards.forEach(card=>{
+  // pointer events (works for mouse + touch when using these handlers)
+  card.addEventListener('touchstart', onPointerDown, {passive:false});
+  card.addEventListener('mousedown', onPointerDown);
+});
+
+document.addEventListener('touchmove', onPointerMove, {passive:false});
+document.addEventListener('mousemove', onPointerMove);
+document.addEventListener('touchend', onPointerUp);
+document.addEventListener('mouseup', onPointerUp);
+
+/* ---------- mostrar marcador y verso ---------- */
+function showMarker(card){
+  // evitar duplicados
+  if(card.querySelector('.marker')) return;
+  const mark = document.createElement('div');
+  mark.className = 'marker';
+  const targetZone = card.dataset.target;
+  // zone id mapping: usamos ids 'jews' y 'gentiles'
+  let zoneId = (targetZone === 'jews' || targetZone === 'jew' || targetZone === 'judios') ? 'jews' : 'gentiles';
+  // la zona real donde quedó:
+  const parentZone = card.parentElement;
+  const isCorrect = parentZone && parentZone.classList.contains('dropzone') && parentZone.id === zoneId;
+  mark.textContent = isCorrect ? '✔' : '✘';
+  mark.style.color = isCorrect ? 'green' : 'red';
+  card.appendChild(mark);
+
+  // mostrar verso (limpiamos el texto para que no muestre marcas)
+  const keyText = card.textContent.replace('✔','').replace('✘','').trim();
+  const verso = card.dataset.verso || '';
+  // mostrar en el div verso
+  const prefix = isCorrect ? 'Correcto — ' : 'Incorrecto — ';
+  versoDiv.innerText = `${prefix}${keyText}: ${verso}`;
+}
+
+/* ---------- reset ---------- */
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  // mover cada tarjeta a optionsArea y reset styles/flags
+  const allCards = Array.from(document.querySelectorAll('.card'));
+  allCards.forEach(c=>{
+    optionsArea.appendChild(c);
+    c.style.position = 'relative';
+    c.style.left = '';
+    c.style.top = '';
+    c.style.zIndex = '';
+    c.dataset.locked = '';
+    const m = c.querySelector('.marker'); if(m) m.remove();
+  });
+  versoDiv.innerText = 'Versículos aparecerán aquí al colocar una respuesta.';
+});
+</script>
 </body>
 </html>
