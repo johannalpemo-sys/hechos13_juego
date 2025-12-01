@@ -113,10 +113,11 @@ let current = null;
 let offsetX = 0, offsetY = 0;
 let originalParent = null;
 
+// ======= Drag & Drop mejorado para scroll y touch =======
 function onStart(e){
   if(gameOver) return;
   const isTouch = e.type==="touchstart";
-  const ev = isTouch?e.touches[0]:e;
+  const ev = isTouch ? e.touches[0] : e;
   const wrapper = this.parentElement;
   const item = this;
   if(item.dataset.locked==="true") return;
@@ -125,13 +126,13 @@ function onStart(e){
   originalParent = wrapper.parentElement;
 
   const rect = wrapper.getBoundingClientRect();
-  offsetX = ev.clientX - rect.left;
-  offsetY = ev.clientY - rect.top;
+  offsetX = ev.pageX - (rect.left + window.scrollX);
+  offsetY = ev.pageY - (rect.top + window.scrollY);
 
   document.body.appendChild(wrapper);
   wrapper.style.position = "absolute";
-  wrapper.style.left = rect.left + "px";
-  wrapper.style.top  = rect.top  + "px";
+  wrapper.style.left = rect.left + window.scrollX + "px";
+  wrapper.style.top  = rect.top + window.scrollY + "px";
   wrapper.style.zIndex = 9999;
 
   if(isTouch) e.preventDefault();
@@ -140,11 +141,11 @@ function onStart(e){
 function onMove(e){
   if(!current) return;
   const isTouch = e.type==="touchmove";
-  const ev = isTouch?e.touches[0]:e;
+  const ev = isTouch ? e.touches[0] : e;
   if(isTouch) e.preventDefault();
 
-  current.style.left = (ev.clientX - offsetX) + "px";
-  current.style.top  = (ev.clientY - offsetY) + "px";
+  current.style.left = (ev.pageX - offsetX) + "px";
+  current.style.top  = (ev.pageY - offsetY) + "px";
 }
 
 function onEnd(e){
@@ -191,6 +192,7 @@ document.addEventListener("touchmove",onMove,{passive:false});
 document.addEventListener("mouseup",onEnd);
 document.addEventListener("touchend",onEnd);
 
+// ====== Evaluación y resultados ======
 function markResult(item, zone, forceWrong=false){
   if(item.dataset.locked==="true") return;
   const key = item.innerText.trim();
