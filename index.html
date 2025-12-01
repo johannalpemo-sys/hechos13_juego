@@ -7,7 +7,7 @@
 <style>
   :root{--bg:#f3f3f3;--card-radius:12px}
   body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:18px;background:var(--bg);color:#111}
-  h1{font-size:20px;margin:0 0 8px;text-align:center}
+  h1{font-size:20px;margin:0 0 8px;text-align:center;line-height:1.4}
   .top{max-width:980px;margin:0 auto}
   #timer{font-weight:700;color:#b71c1c;margin-top:6px;text-align:center}
   .container{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:18px}
@@ -33,9 +33,11 @@
 </head>
 <body>
 <div class="top">
-  <h1>  La exhortación de Pablo en Antioquía (3ª. Parte)<br>
-  Regocijo y persecución por la Palabra<br>
-  Hechos 13:42-52</h1>
+  <h1>
+    La exhortación de Pablo en Antioquía (3ª. Parte)<br>
+    Regocijo y persecución por la Palabra<br>
+    Hechos 13:42-52
+  </h1>
   <div id="timer">Tiempo: 60</div>
 
   <div class="container">
@@ -113,7 +115,6 @@ let current = null;
 let offsetX = 0, offsetY = 0;
 let originalParent = null;
 
-// ======= Drag & Drop mejorado para scroll y touch =======
 function onStart(e){
   if(gameOver) return;
   const isTouch = e.type==="touchstart";
@@ -126,13 +127,13 @@ function onStart(e){
   originalParent = wrapper.parentElement;
 
   const rect = wrapper.getBoundingClientRect();
-  offsetX = ev.pageX - (rect.left + window.scrollX);
-  offsetY = ev.pageY - (rect.top + window.scrollY);
+  offsetX = ev.clientX - rect.left;
+  offsetY = ev.clientY - rect.top;
 
   document.body.appendChild(wrapper);
-  wrapper.style.position = "absolute";
-  wrapper.style.left = rect.left + window.scrollX + "px";
-  wrapper.style.top  = rect.top + window.scrollY + "px";
+  wrapper.style.position = "fixed"; // fixed evita problemas con scroll
+  wrapper.style.left = rect.left + "px";
+  wrapper.style.top  = rect.top + "px";
   wrapper.style.zIndex = 9999;
 
   if(isTouch) e.preventDefault();
@@ -144,8 +145,8 @@ function onMove(e){
   const ev = isTouch ? e.touches[0] : e;
   if(isTouch) e.preventDefault();
 
-  current.style.left = (ev.pageX - offsetX) + "px";
-  current.style.top  = (ev.pageY - offsetY) + "px";
+  current.style.left = (ev.clientX - offsetX) + "px";
+  current.style.top  = (ev.clientY - offsetY) + "px";
 }
 
 function onEnd(e){
@@ -180,6 +181,7 @@ function onEnd(e){
     wrapper.style.top = "";
     wrapper.style.zIndex = "";
   }
+
   current = null;
 }
 
@@ -192,7 +194,6 @@ document.addEventListener("touchmove",onMove,{passive:false});
 document.addEventListener("mouseup",onEnd);
 document.addEventListener("touchend",onEnd);
 
-// ====== Evaluación y resultados ======
 function markResult(item, zone, forceWrong=false){
   if(item.dataset.locked==="true") return;
   const key = item.innerText.trim();
